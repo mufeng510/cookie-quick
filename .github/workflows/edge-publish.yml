@@ -35,11 +35,12 @@ jobs:
         run: npm run package
 
       - name: Upload and publish to Microsoft Edge Add-ons
-        # Uses the official Microsoft Edge Add-ons API. Credentials are
-        # provided exclusively via GitHub Secrets and never logged.
-        uses: christophlerschl/edge-addons-action@v1
+        # Uses the official Microsoft Edge Add-ons API v1.1 via the
+        # wdzeng/edge-addon action. Credentials are provided exclusively via
+        # GitHub Secrets and are never printed or logged.
+        uses: wdzeng/edge-addon@v2
         with:
-          productId: ${{ secrets.EDGE_PRODUCT_ID }}
-          clientId: ${{ secrets.EDGE_CLIENT_ID }}
-          apiKey: ${{ secrets.EDGE_API_KEY }}
-          filePath: release/*.zip
+          product-id: ${{ secrets.EDGE_PRODUCT_ID }}
+          client-id: ${{ secrets.EDGE_CLIENT_ID }}
+          api-key: ${{ secrets.EDGE_API_KEY }}
+          zip-path: release/*.zip

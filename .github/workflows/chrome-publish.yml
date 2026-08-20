@@ -35,14 +35,15 @@ jobs:
         run: npm run package
 
       - name: Upload and publish to Chrome Web Store
-        # Uses the official Chrome Web Store API. Credentials are provided
-        # exclusively via GitHub Secrets and are never printed or logged.
-        uses: ewup/chrome-webstore-upload@v1
+        # Uses the official Chrome Web Store API v2 via the wdzeng/chrome-extension
+        # action. Credentials are provided exclusively via GitHub Secrets and are
+        # never printed or logged.
+        uses: wdzeng/chrome-extension@v2
         with:
-          extensionId: ${{ secrets.CHROME_EXTENSION_ID }}
-          clientId: ${{ secrets.CHROME_CLIENT_ID }}
-          clientSecret: ${{ secrets.CHROME_CLIENT_SECRET }}
-          refreshToken: ${{ secrets.CHROME_REFRESH_TOKEN }}
-          publisherId: ${{ secrets.CHROME_PUBLISHER_ID }}
-          file: release/*.zip
-          publish: true
+          extension-id: ${{ secrets.CHROME_EXTENSION_ID }}
+          publisher-id: ${{ secrets.CHROME_PUBLISHER_ID }}
+          client-id: ${{ secrets.CHROME_CLIENT_ID }}
+          client-secret: ${{ secrets.CHROME_CLIENT_SECRET }}
+          refresh-token: ${{ secrets.CHROME_REFRESH_TOKEN }}
+          zip-path: release/*.zip
+          action: publish
