@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cookie Quick</title>
+    <link rel="stylesheet" href="./popup.css" />
+  </head>
+  <body>
+    <div id="app">
+      <header class="app-header">
+        <h1 class="app-title">Cookie Quick</h1>
+      </header>
+
+      <section class="meta">
+        <div class="meta-row">
+          <span class="meta-label">当前网站</span>
+          <span id="site" class="meta-value">—</span>
+        </div>
+        <div class="meta-row">
+          <span class="meta-label">Cookie</span>
+          <span id="count" class="meta-value">—</span>
+        </div>
+      </section>
+
+      <main class="actions">
+        <button id="copy-btn" class="btn btn-copy" disabled>
+          📋 复制 Cookie
+        </button>
+        <button id="delete-btn" class="btn btn-delete" disabled>
+          🗑 删除全部 Cookie
+        </button>
+      </main>
+
+      <footer class="status">
+        <span id="status" class="status-text">正在加载…</span>
+      </footer>
+    </div>
+    <script type="module" src="./popup.ts"></script>
+  </body>
+</html>

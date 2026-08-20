@@ -1,0 +1,23 @@
+{
+  "manifest_version": 3,
+  "name": "Cookie Quick",
+  "version": "1.0.0",
+  "description": "Copy or delete all cookies for the current page with one click.",
+  "permissions": [
+    "cookies",
+    "activeTab",
+    "clipboardWrite"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "action": {
+    "default_popup": "src/popup/index.html",
+    "default_title": "Cookie Quick"
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}
