@@ -19,3 +19,9 @@ All notable changes to this project are documented here.
 
 - Cookie data is processed locally only and never transmitted, stored, or logged.
 - Publishing credentials are read exclusively from GitHub Secrets.
+
+### GitHub Actions
+
+- `CI`, `release.yml` (GitHub Release + ZIP asset), `chrome-publish.yml` (Chrome Web Store API v2 via `wdzeng/chrome-extension`), and `edge-publish.yml` (Edge Add-ons API v1.1 via `wdzeng/edge-addon`) workflows.
+- Store publish workflows support both tag-triggered and manual (`workflow_dispatch`) runs.
+- Store publishing requires the `CHROME_*` / `EDGE_*` GitHub Secrets to be configured before it can complete.
