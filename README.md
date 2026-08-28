@@ -2,10 +2,10 @@
 
 **A minimal, privacy-first browser extension for Chrome and Microsoft Edge.**
 
-Copy or delete **all cookies for the current page** with a single click.
+Copy all cookies or clear site data for the current page with a single click.
 
 - **Copy all cookies** — copies a standard HTTP Cookie header string (`name1=value1; name2=value2`) to your clipboard.
-- **Delete all cookies** — removes every cookie matching the current page URL after a confirmation step.
+- **Clear site data** — removes cookies plus the site's storage (localStorage, sessionStorage, IndexedDB, Cache Storage, service workers, and more), matching the browser dev tools "Clear site data" action, after a confirmation step.
 
 That's it. No cookie editor, no JSON export, no import/restore, no accounts, no analytics.
 
@@ -14,7 +14,7 @@ That's it. No cookie editor, no JSON export, no import/restore, no accounts, no 
 ## Features
 
 - 📋 **Copy all cookies for the current page** — produces exactly `name=value; name=value; name=value`, never JSON, never `Cookie:`, never newlines.
-- 🗑 **Delete all cookies for the current page** — removes matching cookies using the browser's own scope rules, with a confirmation dialog and verified result reporting.
+- 🗑 **Clear site data for the current page** — removes cookies and scoped storage using the browser's own `browsingData` API, with a confirmation dialog and verified result reporting.
 
 ## Privacy
 
@@ -35,7 +35,8 @@ Never does the extension:
 
 | Permission | Why it is needed |
 | --- | --- |
-| `cookies` | Read and delete cookies for the current page via `chrome.cookies`. |
+| `cookies` | Read cookies for the current page via `chrome.cookies`. |
+| `browsingData` | Clear cookies and site storage for the current page via `chrome.browsingData`. |
 | `activeTab` | Read the current active tab's URL to know which site to operate on. |
 | `clipboardWrite` | Write the copied cookie header to the system clipboard. |
 | `host_permissions: <all_urls>` | Required by the Chrome `cookies` API to access cookies on arbitrary pages. Data stays local. |
@@ -119,7 +120,7 @@ On a `v*` tag, the extension is packaged and submitted to the Microsoft Edge Add
 
 ## Single Purpose
 
-**This extension's single purpose is to copy or delete all cookies for the current page — and nothing else.**
+**This extension's single purpose is to copy all cookies or clear site data for the current page — and nothing else.**
 
 ## License
 

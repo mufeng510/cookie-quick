@@ -2,19 +2,19 @@
 
 **Effective date:** version 1.0.0
 
-Cookie Quick is a browser extension whose single purpose is to copy or delete all cookies for the current page. This document explains exactly what the extension does with your data.
+Cookie Quick is a browser extension whose single purpose is to copy all cookies or clear site data for the current page. This document explains exactly what the extension does with your data.
 
 ## Data collected
 
 Cookie Quick collects **no personal data**. It does not collect, store, or transmit any information about you.
 
-The only data the extension ever touches is the set of cookies for the currently active web page, and only when **you** click **Copy Cookie** or **Delete Cookie**.
+The only data the extension ever touches is the set of cookies for the currently active web page, and only when **you** click **Copy Cookie** or **Clear site data**.
 
 ## How cookie data is processed
 
 - All cookie processing happens **locally, inside your browser**.
 - Copying reads cookies via the browser's `chrome.cookies` API and writes the formatted header `name=value; name=value` to your system clipboard.
-- Deleting removes cookies via the browser's `chrome.cookies` API.
+- Clearing site data removes cookies plus the site's storage (localStorage, sessionStorage, IndexedDB, Cache Storage, service workers, and more) via the browser's `chrome.browsingData` API.
 - **Cookie data exists only in memory, transiently, during the operation you initiate.**
 
 ## What the extension never does
@@ -36,7 +36,8 @@ The only data the extension ever touches is the set of cookies for the currently
 
 | Permission | Purpose |
 | --- | --- |
-| `cookies` | Read and delete cookies for the current page. |
+| `cookies` | Read cookies for the current page. |
+| `browsingData` | Clear cookies and site storage for the current page. |
 | `activeTab` | Read the current tab's URL to determine which site to operate on. |
 | `clipboardWrite` | Write the copied cookie header to the system clipboard. |
 | `host_permissions: <all_urls>` | Required by the Chrome `cookies` API to access cookies for arbitrary pages you visit. This broad permission is a technical requirement of the API, not a request to collect data. No cookie data leaves your browser. |

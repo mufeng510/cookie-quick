@@ -13,7 +13,7 @@ import {
   getOperableUrl,
   getCurrentCookies,
   formatCookieHeader,
-  deleteAllCurrentCookies,
+  clearSiteData,
   cookiesRemainForUrl,
 } from '../services/cookie-service';
 import { getDisplayHostname } from '../utils/url';
@@ -109,34 +109,29 @@ async function handleDelete(): Promise<void> {
   }
 
   const confirmed = window.confirm(
-    `确定删除当前页面的全部 Cookie？\n\n当前共有：\n${cookies.length} 个 Cookie`,
+    `确定清除当前站点的全部数据？\n\n将清除：\n· Cookie × ${cookies.length}\n· 本地存储（Local/Session Storage）\n· IndexedDB\n· 缓存与 Service Worker`,
   );
   if (!confirmed) {
-    setStatus('已取消删除', 'muted');
+    setStatus('已取消清除', 'muted');
     return;
   }
 
   deleteBtn.disabled = true;
   copyBtn.disabled = true;
   try {
-    const result = await deleteAllCurrentCookies(currentUrl);
-    const remain = await cookiesRemainForUrl(currentUrl);
+    const result = await clearSiteData(currentUrl);
 
-    if (result.ok && result.removed > 0 && result.failed === 0 && !remain) {
-      setStatus(`✓ 已删除 ${result.removed} 个 Cookie`, 'success');
-    } else if (result.ok && remain) {
-      setStatus('⚠ 部分删除失败，仍有 Cookie 残留', 'warn');
-    } else if (result.ok && result.failed > 0) {
-      setStatus(`⚠ 已删除 ${result.removed} 个 Cookie，${result.failed} 个删除失败`, 'warn');
-    } else if (result.ok && result.removed === 0 && result.failed === 0) {
-      setStatus('当前页面没有 Cookie', 'muted');
-    } else if (result.ok) {
-      setStatus(`✓ 已删除 ${result.removed} 个 Cookie`, 'success');
+    if (result.ok) {
+      const remain = await cookiesRemainForUrl(currentUrl);
+      setStatus(
+        remain ? '⚠ 站点数据已清除，但仍有 Cookie 残留' : '✓ 已清除站点数据',
+        remain ? 'warn' : 'success',
+      );
     } else {
-      setStatus('删除过程中出错，请重试。', 'error');
+      setStatus(result.reason, 'error');
     }
   } catch {
-    setStatus('删除过程中出错，请重试。', 'error');
+    setStatus('清除过程中出错，请重试。', 'error');
   } finally {
     await refreshCount();
     copyBtn.disabled = false;

@@ -1,4 +1,4 @@
-import { CookieInfo, CopyResult, DeleteResult } from '../types/cookie';
+import { CookieInfo, CopyResult, DeleteResult, ClearSiteDataResult } from '../types/cookie';
 import { canOperateOnUrl, buildDeleteUrl } from '../utils/url';
 import { ActiveTab, getCurrentTab, getOperableUrl } from '../utils/tab';
 
@@ -132,6 +132,34 @@ export async function copyCookiesForUrl(
 /** Whether the given URL is eligible for cookie operations. */
 export function isOperableUrl(url: string): boolean {
   return canOperateOnUrl(url);
+}
+
+/**
+ * Clears all site data for the given page origin, mirroring the browser dev
+ * tools "Clear site data" action: cookies plus the scoped storage types
+ * (localStorage/sessionStorage, IndexedDB, Cache Storage, HTTP cache, service
+ * workers, WebSQL, and file systems).
+ */
+export async function clearSiteData(url: string): Promise<ClearSiteDataResult> {
+  const origin = new URL(url).origin;
+  try {
+    await chrome.browsingData.remove(
+      { origins: [origin], since: 0 },
+      {
+        cookies: true,
+        localStorage: true,
+        indexedDB: true,
+        cacheStorage: true,
+        cache: true,
+        serviceWorkers: true,
+        webSQL: true,
+        fileSystems: true,
+      },
+    );
+    return { ok: true, origin };
+  } catch {
+    return { ok: false, reason: '清除站点数据失败' };
+  }
 }
 
 export { getOperableUrl };

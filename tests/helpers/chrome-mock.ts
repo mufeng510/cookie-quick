@@ -15,8 +15,15 @@ export interface FakeCookie {
   storeId?: string;
 }
 
+/** Arguments captured from a chrome.browsingData.remove call. */
+export interface RemovalCall {
+  options: { origins: string[]; since: number };
+  dataToRemove: Record<string, boolean>;
+}
+
 export class CookieStoreFake {
   cookies: FakeCookie[] = [];
+  removalCalls: RemovalCall[] = [];
 
   add(c: FakeCookie): void {
     this.cookies.push({ storeId: '0', ...c });
@@ -76,6 +83,13 @@ export function installChromeMock(rejects: string[] = []): CookieStoreFake {
         return Promise.resolve([
           { id: 1, url: currentTabUrl, active: true, currentWindow: true },
         ]);
+      },
+    },
+    browsingData: {
+      remove: (options: { origins: string[]; since: number }, dataToRemove: Record<string, boolean>) => {
+        if (rejects.includes('browsingData')) return Promise.reject(new Error('browsingData failed'));
+        store.removalCalls.push({ options, dataToRemove });
+        return Promise.resolve(undefined);
       },
     },
   };

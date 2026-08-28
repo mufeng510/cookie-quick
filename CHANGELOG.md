@@ -2,6 +2,12 @@
 
 All notable changes to this project are documented here.
 
+## [Unreleased]
+
+### Changed
+
+- **Clear site data** replaces the previous delete-cookies-only behavior. The delete action now clears cookies plus all scoped storage for the current site (localStorage/sessionStorage, IndexedDB, Cache Storage, HTTP cache, service workers, WebSQL, file systems), matching the browser dev tools "Clear site data" action via the `chrome.browsingData` API.
+
 ## [1.0.0] - 2026-08-19
 
 ### Added

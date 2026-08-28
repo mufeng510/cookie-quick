@@ -10,3 +10,4 @@ release/
 
 # OMX runtime state
 .omx/
+.omo/

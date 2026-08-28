@@ -24,3 +24,8 @@ export type CopyResult =
 export type DeleteResult =
   | { ok: true; attempted: number; removed: number; failed: number }
   | { ok: false; reason: string };
+
+/** The result of clearing all site data (cookies + storage) for a page. */
+export type ClearSiteDataResult =
+  | { ok: true; origin: string }
+  | { ok: false; reason: string };

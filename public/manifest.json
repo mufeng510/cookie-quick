@@ -2,11 +2,12 @@
   "manifest_version": 3,
   "name": "Cookie Quick",
   "version": "1.0.0",
-  "description": "Copy or delete all cookies for the current page with one click.",
+  "description": "Copy all cookies or clear site data (cookies, storage, cache) for the current page with one click.",
   "permissions": [
     "cookies",
     "activeTab",
-    "clipboardWrite"
+    "clipboardWrite",
+    "browsingData"
   ],
   "host_permissions": [
     "<all_urls>"

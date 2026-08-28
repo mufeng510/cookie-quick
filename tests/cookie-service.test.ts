@@ -6,6 +6,7 @@ import {
   copyCookiesForUrl,
   deleteCookie,
   toCookieInfo,
+  clearSiteData,
 } from '../src/services/cookie-service';
 import type { CookieInfo } from '../src/types/cookie';
 import { installChromeMock, resetChromeMock, setCurrentTabUrl, CookieStoreFake } from './helpers/chrome-mock';
@@ -213,3 +214,43 @@ describe('deleteCookie / deleteAllCurrentCookies', () => {
     expect(result).toEqual({ ok: true, attempted: 0, removed: 0, failed: 0 });
   });
 });
+
+describe('clearSiteData', () => {
+  it('clears cookies and all storage types for the page origin', async () => {
+    const result = await clearSiteData('https://www.example.com/test');
+    expect(result).toEqual({ ok: true, origin: 'https://www.example.com' });
+    expect(store.removalCalls).toHaveLength(1);
+
+    const call = store.removalCalls[0];
+    expect(call.options.origins).toEqual(['https://www.example.com']);
+    expect(call.options.since).toBe(0);
+    expect(call.dataToRemove).toEqual({
+      cookies: true,
+      localStorage: true,
+      indexedDB: true,
+      cacheStorage: true,
+      cache: true,
+      serviceWorkers: true,
+      webSQL: true,
+      fileSystems: true,
+    });
+  });
+
+  it('uses the exact origin including non-default port', async () => {
+    await clearSiteData('https://www.example.com:8443/path');
+    expect(store.removalCalls[0].options.origins).toEqual(['https://www.example.com:8443']);
+  });
+
+  it('reports failure when browsingData.remove rejects', async () => {
+    removeAllCookies();
+    resetChromeMock();
+    store = installChromeMock(['browsingData']);
+    setCurrentTabUrl('https://www.example.com/test');
+    const result = await clearSiteData('https://www.example.com/test');
+    expect(result).toEqual({ ok: false, reason: '清除站点数据失败' });
+  });
+});
+
+function removeAllCookies(): void {
+  store.cookies.splice(0, store.cookies.length);
+}
