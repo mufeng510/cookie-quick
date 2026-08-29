@@ -1,9 +1,11 @@
 name: Publish to Chrome Web Store
 
+# Manual fallback for (re-)publishing an already-released version; the
+# automatic publish runs as part of the Release workflow on every new version.
+# To publish a specific release, dispatch this workflow with the ref set to
+# its v<version> tag, e.g.:
+#   gh workflow run chrome-publish.yml --ref v1.1.0
 on:
-  push:
-    tags:
-      - 'v*'
   workflow_dispatch:
 
 jobs:

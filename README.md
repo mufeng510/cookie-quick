@@ -80,35 +80,29 @@ npm run lint           # eslint
 
 > The ZIP produced by `npm run package` is the file you upload to the Chrome Web Store / Edge Add-ons.
 
-## Reproducing a release with a tag
+## Releasing
 
-Pushing a Git tag such as `v1.0.0` triggers an automated GitHub Release:
+Releases are fully automatic and driven by the version in `package.json`. To ship a release:
+
+1. Bump `version` in `package.json` (semver) and run `node scripts/sync-version.mjs`.
+2. Update `CHANGELOG.md`.
+3. Push to `main`.
+
+The `Release` workflow then detects the unreleased version, and: installs deps, lints, tests, builds, packages, pushes the `v<version>` tag, creates the GitHub Release with the extension ZIP, and publishes it to both stores. Already-released versions are skipped, so ordinary pushes to `main` never publish anything.
+
+Required GitHub Secrets for store publishing (until configured, those publish steps are skipped with a warning):
+
+- Chrome Web Store: `CHROME_EXTENSION_ID`, `CHROME_PUBLISHER_ID`, `CHROME_CLIENT_ID`, `CHROME_CLIENT_SECRET`, `CHROME_REFRESH_TOKEN`
+- Edge Add-ons: `EDGE_PRODUCT_ID`, `EDGE_CLIENT_ID`, `EDGE_API_KEY`
+
+> Only the official Chrome Web Store API / Edge Add-ons API are used — no legacy publishing endpoints.
+
+To (re-)publish an already-released version manually, dispatch the `Publish to Chrome Web Store` / `Publish to Microsoft Edge Add-ons` workflows, optionally against a tag ref:
 
 ```bash
-git tag v1.0.0
-git push origin v1.0.0
+gh workflow run chrome-publish.yml --ref v1.1.0
+gh workflow run edge-publish.yml --ref v1.1.0
 ```
-
-The `release.yml` workflow: installs deps, lints, tests, builds, packages, creates a GitHub Release, and uploads the extension ZIP.
-
-### Chrome Web Store auto-publish (`chrome-publish.yml`)
-
-On a `v*` tag, the extension is built, packaged, and published to the Chrome Web Store via the official Chrome Web Store API. Required GitHub Secrets:
-
-- `CHROME_EXTENSION_ID`
-- `CHROME_CLIENT_ID`
-- `CHROME_CLIENT_SECRET`
-- `CHROME_REFRESH_TOKEN`
-
-> For the newest "Chrome Web Store API" / Server-to-Server flow, some installations use a `CHROME_PUBLISHER_ID` (or a service-account credential) instead of the refresh-token flow. Configure the secrets matching the API flow your store project uses; **only the official Chrome Web Store API is used — the legacy, deprecated publishing endpoints are not.**
-
-### Edge Add-ons auto-publish (`edge-publish.yml`)
-
-On a `v*` tag, the extension is packaged and submitted to the Microsoft Edge Add-ons store via the official Edge Add-ons API. Required GitHub Secrets:
-
-- `EDGE_PRODUCT_ID`
-- `EDGE_CLIENT_ID`
-- `EDGE_API_KEY`
 
 ## Security
 

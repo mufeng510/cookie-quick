@@ -1,16 +1,57 @@
 name: Release
 
+# Releases are fully automatic and driven by the version in package.json:
+# every push to main is checked, and if that version has no GitHub Release yet,
+# the extension is built, packaged, tagged (v<version>), released on GitHub,
+# and published to the Chrome Web Store and Microsoft Edge Add-ons.
+#
+# To ship a release: bump `version` in package.json, update CHANGELOG.md, push
+# to main. Never create or push release tags manually — CI owns the v* tags.
 on:
   push:
-    tags:
-      - 'v*'
+    branches:
+      - main
+  workflow_dispatch:
 
 permissions:
   contents: write
 
+concurrency:
+  group: release
+  cancel-in-progress: false
+
 jobs:
+  version:
+    name: Resolve version
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      should_release: ${{ steps.gate.outputs.should_release }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Read version from package.json
+        id: version
+        run: echo "version=$(node -p "require('./package.json').version")" >> "$GITHUB_OUTPUT"
+
+      - name: Check whether this version is already released
+        id: gate
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view "v${{ steps.version.outputs.version }}" --repo "$GITHUB_REPOSITORY" > /dev/null 2>&1; then
+            echo "v${{ steps.version.outputs.version }} already has a GitHub Release; nothing to do"
+            echo "should_release=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "v${{ steps.version.outputs.version }} is unreleased; proceeding"
+            echo "should_release=true" >> "$GITHUB_OUTPUT"
+          fi
+
   release:
     name: Build Package & GitHub Release
+    needs: version
+    if: needs.version.outputs.should_release == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -31,10 +72,7 @@ jobs:
       - name: Test
         run: npm run test
 
-      - name: Build
-        run: npm run build
-
-      - name: Package
+      - name: Build & package
         run: npm run package
 
       - name: Upload extension ZIP as artifact
@@ -42,9 +80,100 @@ jobs:
         with:
           name: cookie-quick-extension
           path: release/*.zip
+          if-no-files-found: error
+
+      - name: Create and push v<version> tag
+        run: |
+          VERSION="${{ needs.version.outputs.version }}"
+          if git ls-remote --exit-code origin "refs/tags/v${VERSION}" > /dev/null 2>&1; then
+            echo "Tag v${VERSION} already exists; reusing it"
+          else
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git tag -a "v${VERSION}" -m "Cookie Quick v${VERSION}"
+            git push origin "v${VERSION}"
+          fi
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: v${{ needs.version.outputs.version }}
           files: release/*.zip
           generate_release_notes: true
+
+  publish-chrome:
+    name: Publish to Chrome Web Store
+    needs: [version, release]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download extension ZIP
+        uses: actions/download-artifact@v4
+        with:
+          name: cookie-quick-extension
+          path: release
+
+      - name: Check Chrome Web Store credentials
+        id: creds
+        env:
+          HAS_CREDENTIALS: ${{ secrets.CHROME_CLIENT_ID != '' }}
+        run: |
+          if [ "$HAS_CREDENTIALS" != "true" ]; then
+            echo "::warning::Chrome Web Store secrets are not configured (CHROME_EXTENSION_ID, CHROME_PUBLISHER_ID, CHROME_CLIENT_ID, CHROME_CLIENT_SECRET, CHROME_REFRESH_TOKEN); skipping the Chrome Web Store publish."
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Upload and publish to Chrome Web Store
+        if: steps.creds.outputs.configured == 'true'
+        # Uses the official Chrome Web Store API v2 via the wdzeng/chrome-extension
+        # action. Keep this step in sync with chrome-publish.yml, which is the
+        # manual fallback for re-publishing an already-released version.
+        # Credentials are provided exclusively via GitHub Secrets and are never
+        # printed or logged.
+        uses: wdzeng/chrome-extension@v2
+        with:
+          extension-id: ${{ secrets.CHROME_EXTENSION_ID }}
+          publisher-id: ${{ secrets.CHROME_PUBLISHER_ID }}
+          client-id: ${{ secrets.CHROME_CLIENT_ID }}
+          client-secret: ${{ secrets.CHROME_CLIENT_SECRET }}
+          refresh-token: ${{ secrets.CHROME_REFRESH_TOKEN }}
+          zip-path: release/*.zip
+          action: publish
+
+  publish-edge:
+    name: Publish to Microsoft Edge Add-ons
+    needs: [version, release]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download extension ZIP
+        uses: actions/download-artifact@v4
+        with:
+          name: cookie-quick-extension
+          path: release
+
+      - name: Check Edge Add-ons credentials
+        id: creds
+        env:
+          HAS_CREDENTIALS: ${{ secrets.EDGE_API_KEY != '' }}
+        run: |
+          if [ "$HAS_CREDENTIALS" != "true" ]; then
+            echo "::warning::Edge Add-ons secrets are not configured (EDGE_PRODUCT_ID, EDGE_CLIENT_ID, EDGE_API_KEY); skipping the Edge Add-ons publish."
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Upload and publish to Microsoft Edge Add-ons
+        if: steps.creds.outputs.configured == 'true'
+        # Uses the official Microsoft Edge Add-ons API v1.1 via the
+        # wdzeng/edge-addon action. Keep this step in sync with
+        # edge-publish.yml, which is the manual fallback for re-publishing an
+        # already-released version. Credentials are provided exclusively via
+        # GitHub Secrets and are never printed or logged.
+        uses: wdzeng/edge-addon@v2
+        with:
+          product-id: ${{ secrets.EDGE_PRODUCT_ID }}
+          client-id: ${{ secrets.EDGE_CLIENT_ID }}
+          api-key: ${{ secrets.EDGE_API_KEY }}
+          zip-path: release/*.zip
