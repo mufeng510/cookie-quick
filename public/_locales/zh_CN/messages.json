@@ -1,0 +1,10 @@
+{
+  "extName": {
+    "message": "Cookie Quick",
+    "description": "The extension's display name."
+  },
+  "extDescription": {
+    "message": "一键复制当前页面的全部 Cookie，或清除当前站点的站点数据（Cookie、存储、缓存）。",
+    "description": "The extension's store description."
+  }
+}

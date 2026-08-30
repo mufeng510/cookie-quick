@@ -1,0 +1,10 @@
+{
+  "extName": {
+    "message": "Cookie Quick",
+    "description": "The extension's display name."
+  },
+  "extDescription": {
+    "message": "Copy all cookies or clear site data (cookies, storage, cache) for the current page with one click.",
+    "description": "The extension's store description."
+  }
+}

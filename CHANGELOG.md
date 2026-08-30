@@ -4,6 +4,12 @@ All notable changes to this project are documented here.
 
 ## [Unreleased]
 
+## [1.1.1] - 2026-08-30
+
+### Fixed
+
+- Added extension localization metadata — `_locales` folders for English (default) and Simplified Chinese, localized manifest `name`/`description`/`action.default_title` via `__MSG_...__`, and `default_locale: "en"`. Store partners detect listing languages from the package's `_locales` folder, so packages without it could not proceed past the store listing step (seen in Edge Partner Center, where the detected language came up empty).
+
 ## [1.1.0] - 2026-08-29
 
 ### Changed
