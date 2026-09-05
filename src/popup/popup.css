@@ -127,3 +127,198 @@ body {
 .status-text.muted {
   color: var(--muted);
 }
+
+/* Collapsible panels (import / profiles) */
+
+.panel {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.panel-toggle {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 9px 12px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--fg);
+  background: #f6f7f9;
+  border: none;
+  cursor: pointer;
+}
+
+.panel-toggle .panel-arrow {
+  color: var(--muted);
+  font-size: 12px;
+  transition: transform 0.15s ease;
+}
+
+.panel-toggle[aria-expanded='false'] .panel-arrow {
+  transform: rotate(-90deg);
+}
+
+.panel-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 12px;
+  border-top: 1px solid var(--border);
+}
+
+.panel-body.hidden {
+  display: none;
+}
+
+/* Import */
+
+.import-input {
+  width: 100%;
+  resize: vertical;
+  padding: 8px 10px;
+  font-size: 12px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--fg);
+}
+
+.import-input:focus,
+.remark-input:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+.btn-import {
+  padding: 8px 12px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #ffffff;
+  background: #059669;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.btn-import:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* Profiles */
+
+.save-row {
+  display: flex;
+  gap: 8px;
+}
+
+.remark-input {
+  flex: 1;
+  min-width: 0;
+  padding: 7px 10px;
+  font-size: 13px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--fg);
+}
+
+.btn-save {
+  padding: 7px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #ffffff;
+  background: var(--primary);
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.btn-save:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.profile-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.profile-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: #fafafa;
+}
+
+.profile-info {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.profile-remark {
+  font-size: 13px;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.profile-meta {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.profile-actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.btn-mini {
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  color: #ffffff;
+}
+
+.btn-mini:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.btn-apply {
+  background: var(--primary);
+}
+
+.btn-remove {
+  background: var(--muted);
+}
+
+.profile-empty {
+  font-size: 12px;
+  color: var(--muted);
+  text-align: center;
+  padding: 6px 0;
+}
+
+.storage-note {
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.4;
+}

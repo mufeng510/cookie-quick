@@ -1,4 +1,4 @@
-import { CookieInfo, CopyResult, DeleteResult, ClearSiteDataResult } from '../types/cookie';
+import { CookieInfo, CopyResult, DeleteResult, ClearSiteDataResult, SavedCookie, ImportResult } from '../types/cookie';
 import { canOperateOnUrl, buildDeleteUrl } from '../utils/url';
 import { ActiveTab, getCurrentTab, getOperableUrl } from '../utils/tab';
 
@@ -163,3 +163,83 @@ export async function clearSiteData(url: string): Promise<ClearSiteDataResult> {
 }
 
 export { getOperableUrl };
+
+/**
+ * Parses a pasted HTTP Cookie header into name/value pairs. Segments are
+ * separated by ";" and each pair is split on the FIRST "=" so values may
+ * themselves contain "=" (e.g. base64 padding). Segments without a name are
+ * skipped rather than aborting the whole import.
+ */
+export function parseCookieHeader(header: string): { name: string; value: string }[] {
+  const pairs: { name: string; value: string }[] = [];
+  for (const segment of header.split(';')) {
+    const trimmed = segment.trim();
+    if (trimmed.length === 0) continue;
+    const eq = trimmed.indexOf('=');
+    if (eq <= 0) continue; // no "=" at all, or an empty name ("=value")
+    const name = trimmed.slice(0, eq).trim();
+    if (name.length === 0) continue;
+    pairs.push({ name, value: trimmed.slice(eq + 1).trim() });
+  }
+  return pairs;
+}
+
+/**
+ * Imports parsed cookie pairs into the current page's site via
+ * chrome.cookies.set. The header carries no attributes, so each cookie is
+ * written as a host-only cookie on the page's host with path "/" and the
+ * Secure flag matching the page's scheme. Individual failures are counted,
+ * not fatal, so a partially bad paste still imports the good cookies.
+ */
+export async function importCookiePairs(url: string, pairs: readonly { name: string; value: string }[]): Promise<ImportResult> {
+  if (pairs.length === 0) {
+    return { ok: false, reason: '没有可导入的 Cookie' };
+  }
+
+  const secure = new URL(url).protocol === 'https:';
+  let imported = 0;
+  let failed = 0;
+  for (const pair of pairs) {
+    try {
+      const set = await chrome.cookies.set({
+        url,
+        name: pair.name,
+        value: pair.value,
+        path: '/',
+        secure,
+      });
+      if (set) imported += 1;
+      else failed += 1;
+    } catch {
+      failed += 1;
+    }
+  }
+
+  return { ok: true, attempted: pairs.length, imported, failed };
+}
+
+/**
+ * Imports a pasted Cookie header ("name1=value1; name2=value2") into the
+ * current page's site.
+ */
+export async function importCookiesForUrl(url: string, header: string): Promise<ImportResult> {
+  return importCookiePairs(url, parseCookieHeader(header));
+}
+
+/**
+ * Captures the cookies applicable to the given page URL together with the
+ * attributes needed to restore them later (domain/path/secure/httpOnly/
+ * expirationDate). Used when saving a cookie profile.
+ */
+export async function getDetailedCookies(url: string): Promise<SavedCookie[]> {
+  const all = await chrome.cookies.getAll({ url });
+  return all.map((cookie) => ({
+    name: cookie.name,
+    value: cookie.value,
+    domain: cookie.domain,
+    path: cookie.path,
+    secure: cookie.secure,
+    httpOnly: Boolean((cookie as { httpOnly?: boolean }).httpOnly),
+    expirationDate: (cookie as { expirationDate?: number }).expirationDate,
+  }));
+}

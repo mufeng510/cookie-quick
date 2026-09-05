@@ -2,12 +2,14 @@
 
 **A minimal, privacy-first browser extension for Chrome and Microsoft Edge.**
 
-Copy all cookies or clear site data for the current page with a single click.
+Copy all cookies, import cookies, or switch saved accounts for the current page with a single click.
 
 - **Copy all cookies** — copies a standard HTTP Cookie header string (`name1=value1; name2=value2`) to your clipboard.
 - **Clear site data** — removes cookies plus the site's storage (localStorage, sessionStorage, IndexedDB, Cache Storage, service workers, and more), matching the browser dev tools "Clear site data" action, after a confirmation step.
+- **Import cookies** — paste a Cookie header and apply it to the current site, with a per-cookie result report.
+- **Account switching** — save the current site's cookies under a remark ("work account", "personal account") and switch between them. Saved profiles live only in your browser's local extension storage; nothing is ever synced or transmitted.
 
-That's it. No cookie editor, no JSON export, no import/restore, no accounts, no analytics.
+That's it. No cookie editor, no JSON export, no accounts in the cloud, no analytics.
 
 ---
 
@@ -15,6 +17,8 @@ That's it. No cookie editor, no JSON export, no import/restore, no accounts, no 
 
 - 📋 **Copy all cookies for the current page** — produces exactly `name=value; name=value; name=value`, never JSON, never `Cookie:`, never newlines.
 - 🗑 **Clear site data for the current page** — removes cookies and scoped storage using the browser's own `browsingData` API, with a confirmation dialog and verified result reporting.
+- 📥 **Import cookies** — paste a Cookie header (`name1=value1; name2=value2`) and apply it to the current site via `chrome.cookies`; pairs that fail are counted, not silently dropped.
+- 👤 **Save & switch accounts** — capture the current site's cookies (with domain/path/secure/httpOnly/expiry attributes) as a named profile, then restore them in one click: existing cookies are cleared first, the profile is written back, and the page reloads. Profiles are stored **only** in `chrome.storage.local` on your device.
 
 ## Privacy
 
@@ -23,11 +27,12 @@ This extension is **local-only**. It processes cookies entirely inside your brow
 Never does the extension:
 
 - Upload or transmit cookie data to any server.
-- Save or persist cookie data (no `chrome.storage`, no `localStorage`, no `sessionStorage`).
 - Analyze, aggregate, or profile cookie data.
 - Use analytics, telemetry, tracking, or third-party services.
 - Load any remote or CDN JavaScript.
 - Use `console.log` on cookie values.
+
+The one place cookie data is ever persisted is `chrome.storage.local` — the browser's own on-device extension storage — and only when you explicitly click **保存 (Save)** to snapshot the current site's cookies as a profile. Profiles never leave your device and are removed when you delete them in the popup or uninstall the extension.
 
 > **Why `<all_urls>`?** The Chrome `cookies` API requires host permissions covering the sites whose cookies the extension accesses. Because this extension must read/delete cookies on *any* page you visit, the broad `host_permissions: ["<all_urls>"]` permission is technically required. Cookie data never leaves your local browser, and no network request is ever made.
 
@@ -35,10 +40,11 @@ Never does the extension:
 
 | Permission | Why it is needed |
 | --- | --- |
-| `cookies` | Read cookies for the current page via `chrome.cookies`. |
+| `cookies` | Read, set, and delete cookies for the current page via `chrome.cookies`. |
 | `browsingData` | Clear cookies and site storage for the current page via `chrome.browsingData`. |
 | `activeTab` | Read the current active tab's URL to know which site to operate on. |
 | `clipboardWrite` | Write the copied cookie header to the system clipboard. |
+| `storage` | Store saved cookie profiles locally on your device via `chrome.storage.local`. Never synced, never transmitted. |
 | `host_permissions: <all_urls>` | Required by the Chrome `cookies` API to access cookies on arbitrary pages. Data stays local. |
 
 ## Development
@@ -107,14 +113,15 @@ gh workflow run edge-publish.yml --ref v1.1.0
 ## Security
 
 - No network requests (`fetch`, `XMLHttpRequest`, `WebSocket`) are made anywhere in the extension.
-- No cookie value is ever written to storage, logs, URLs, query strings, or hashes.
-- Cookie data exists only transiently in memory during a copy/delete operation.
+- No cookie value is ever written to logs, URLs, query strings, or hashes.
+- Cookie data exists transiently in memory during copy/import/clear operations.
+- The only persistence is `chrome.storage.local` (on-device), written only when you explicitly save a cookie profile.
 - No `eval`, no `new Function`, no remote code.
 - All publishing credentials are read from GitHub Secrets and are never printed, echoed, or written into artifacts.
 
 ## Single Purpose
 
-**This extension's single purpose is to copy all cookies or clear site data for the current page — and nothing else.**
+**This extension's single purpose is to manage the current page's cookies locally — copy them, import them, clear site data, and switch between saved accounts — and nothing else.**
 
 ## License
 

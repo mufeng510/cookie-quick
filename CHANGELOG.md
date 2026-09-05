@@ -4,6 +4,14 @@ All notable changes to this project are documented here.
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-08-30
+
+### Added
+
+- **Import cookies** — paste a Cookie header (`name1=value1; name2=value2`) into the popup and apply it to the current site via `chrome.cookies.set`; each pair is written as a host-only cookie on the page's host with the Secure flag derived from the page scheme, and per-cookie failures are counted, not silently dropped.
+- **Save & switch accounts (cookie profiles)** — save the current site's cookies (with domain, path, secure, httpOnly, and expiry attributes) as a named profile with a remark, list them per-site in the popup, and switch accounts in one click: existing site cookies are cleared first, the profile is restored, and the page reloads. Expired cookies are skipped when restoring, and partial restore failures are reported.
+- New `storage` permission for `chrome.storage.local`. Profiles are stored **only** on the user's own device, never synced, and never transmitted; the README, store listings, and privacy disclosures have been updated accordingly.
+
 ## [1.1.1] - 2026-08-30
 
 ### Fixed

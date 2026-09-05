@@ -32,6 +32,44 @@
         </button>
       </main>
 
+      <section class="panel">
+        <button id="import-toggle" class="panel-toggle" type="button" aria-expanded="false">
+          <span>📥 导入 Cookie</span>
+          <span class="panel-arrow">▾</span>
+        </button>
+        <div id="import-panel" class="panel-body hidden">
+          <textarea
+            id="import-input"
+            class="import-input"
+            rows="3"
+            placeholder="粘贴 Cookie 头：&#10;name1=value1; name2=value2"
+            spellcheck="false"
+          ></textarea>
+          <button id="import-btn" class="btn btn-import" disabled>导入到当前网站</button>
+        </div>
+      </section>
+
+      <section class="panel">
+        <button id="profiles-toggle" class="panel-toggle" type="button" aria-expanded="true">
+          <span>👤 账号切换（本站）</span>
+          <span class="panel-arrow">▾</span>
+        </button>
+        <div id="profiles-panel" class="panel-body">
+          <div class="save-row">
+            <input
+              id="profile-remark"
+              class="remark-input"
+              type="text"
+              maxlength="50"
+              placeholder="备注（可选），如：工作账号"
+            />
+            <button id="save-profile-btn" class="btn-save" disabled>保存</button>
+          </div>
+          <ul id="profile-list" class="profile-list"></ul>
+          <p class="storage-note">账号数据仅保存在本机浏览器中，不联网。</p>
+        </div>
+      </section>
+
       <footer class="status">
         <span id="status" class="status-text">正在加载…</span>
       </footer>
